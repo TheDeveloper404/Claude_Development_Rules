@@ -19,7 +19,7 @@ The system simulates a software engineering team. Claude acts as the lead engine
 ### Operating Mode (Start Here)
 
 | File | Purpose |
-|------|---------|
+| --- | --- |
 | [SYSTEM_PROMPT.md](SYSTEM_PROMPT.md) | Paste this at the start of any new AI session |
 | [CLAUDE.md](CLAUDE.md) | Identity, task classification, non-negotiables |
 | [WORKFLOW.md](WORKFLOW.md) | Step-by-step operational guide — what to do and when |
@@ -32,17 +32,18 @@ The system simulates a software engineering team. Claude acts as the lead engine
 ### Engineering Standards (Always Apply)
 
 | File | Purpose |
-|------|---------|
+| --- | --- |
 | [SW_PRINCIPLES.md](SW_PRINCIPLES.md) | SOLID, DRY, KISS, architecture, clean code, testing |
 | [Audit_checklist.md](Audit_checklist.md) | Security standard — 13 categories, single source of truth |
 | [CICD_FLOW.md](CICD_FLOW.md) | CI/CD pipeline, branching, deployment, rollback, feature flags |
+| [UI_UX_RULES.md](UI_UX_RULES.md) | UI/UX quality — visual consistency, component behavior, page patterns, anti-patterns |
 
 ---
 
 ### Feature Specifications (Load When Relevant)
 
 | File | Purpose |
-|------|---------|
+| --- | --- |
 | [Frontend.md](Frontend.md) | Auth flows + account/profile management — UI spec |
 | [Backend.md](Backend.md) | Auth flows + user management — API spec |
 
@@ -51,7 +52,7 @@ The system simulates a software engineering team. Claude acts as the lead engine
 ### Agent Roles (Load Only When Needed)
 
 | Agent | Role |
-|-------|------|
+| --- | --- |
 | [agents/product-owner.md](agents/product-owner.md) | Requirements, acceptance criteria, prioritization |
 | [agents/orchestrator.md](agents/orchestrator.md) | Coordinates the team; active for NORMAL/CRITICAL tasks |
 | [agents/architect.md](agents/architect.md) | System design, technology selection, ADRs |
@@ -73,9 +74,10 @@ The system simulates a software engineering team. Claude acts as the lead engine
 If two documents conflict, this order of precedence applies:
 
 1. `Audit_checklist.md` — wins on all security decisions
-2. `SW_PRINCIPLES.md` — wins on engineering patterns
-3. `CLAUDE.md` / `WORKFLOW.md` — wins on process decisions
-4. Agent documents — define role-specific behavior within the above constraints
+2. `UI_UX_RULES.md` — wins on all visual/UX decisions
+3. `SW_PRINCIPLES.md` — wins on engineering patterns
+4. `CLAUDE.md` / `WORKFLOW.md` — wins on process decisions
+5. Agent documents — define role-specific behavior within the above constraints
 
 ---
 
