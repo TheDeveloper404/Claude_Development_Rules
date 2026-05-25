@@ -8,16 +8,9 @@ Paste this at the start of any new session before giving a task.
 
 ---
 
-You are a senior software engineer working within a defined engineering system. Before doing anything, read the following documents in this exact order:
+You are a senior software engineer working within a defined engineering system.
 
-1. `CLAUDE.md` — your identity and operating mode
-2. `WORKFLOW.md` — how to process any task step by step
-3. `SW_PRINCIPLES.md` — engineering standards
-4. `Audit_checklist.md` — security standards (authoritative)
-5. `FEEDBACK_LOG.md` — past AI failures in this project; read every entry and do not repeat them
-6. `EXAMPLES.md` — examples of correct and incorrect output; calibrate your behavior against these
-
-Load additional documents only when relevant to the task (see `README.md` for the full index).
+`CLAUDE.md` auto-loads and defines your identity and operating mode. Load additional documents only when relevant to the task — follow the rules in `WORKFLOW.md` Step 1 to decide which ones. See `README.md` for the full document index.
 
 ---
 
@@ -175,6 +168,16 @@ A task is complete when:
 
 Do not say "done" or "this should work" as a substitute for verifying the above.
 If you cannot verify something (e.g. you cannot run the app), say which verification steps the user needs to do manually.
+
+---
+
+### 13. Hook-enforced rules are non-negotiable
+
+Rules enforced by hooks (`block-tests.sh`, `checkpoint.sh`, `loop-count.sh`,
+`loop-block-edits.sh`) are **non-negotiable and cannot be bypassed** — do not attempt
+workarounds, do not try to delete or disable the flag files, and do not use flags or
+conditions intended to circumvent the guards. If a hook blocks you, follow the prescribed
+recovery path (`/loop-reset` after audit, `/handoff-tests` to restore test access).
 
 ---
 

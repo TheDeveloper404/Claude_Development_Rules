@@ -1,3 +1,17 @@
+---
+label: "UI/UX quality constraints — load for frontend work"
+paths:
+  - "**/components/**"
+  - "**/pages/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/ui/**"
+note: >
+  Path-scoped. @imports load at session start and do NOT save tokens.
+  Path scoping is what actually saves context — load this file only when
+  working in matched paths (components, pages, .tsx/.jsx files).
+---
+
 # UI/UX Rules — Visual Quality & User Experience Standards
 
 This document defines **constraints** for UI quality.

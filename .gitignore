@@ -1,0 +1,3 @@
+# Claude Code runtime state — machine-local, never committed
+.claude/HUMAN_RUNS_TESTS
+.claude/.loop-state

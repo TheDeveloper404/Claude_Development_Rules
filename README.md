@@ -24,8 +24,10 @@ The system simulates a software engineering team. Claude acts as the lead engine
 | [CLAUDE.md](CLAUDE.md) | Identity, task classification, non-negotiables |
 | [WORKFLOW.md](WORKFLOW.md) | Step-by-step operational guide — what to do and when |
 | [EXAMPLES.md](EXAMPLES.md) | Concrete examples of correct and incorrect AI output |
-| [FEEDBACK_LOG.md](FEEDBACK_LOG.md) | Log of past AI failures — read before every session |
+| [FEEDBACK_LOG.md](FEEDBACK_LOG.md) | Shared log of past AI failures and corrections |
 | [context/Engineering_Model.md](context/Engineering_Model.md) | Philosophy — why the system is designed this way |
+| [Claude Code – Commands/Commands.md](Claude%20Code%20%E2%80%93%20Commands/Commands.md) | Claude Code CLI command reference |
+| [CHANGELOG.md](CHANGELOG.md) | Ruleset version history and change log |
 
 ---
 
@@ -44,8 +46,22 @@ The system simulates a software engineering team. Claude acts as the lead engine
 
 | File | Purpose |
 | --- | --- |
-| [Frontend.md](Frontend.md) | Auth flows + account/profile management — UI spec |
-| [Backend.md](Backend.md) | Auth flows + user management — API spec |
+| [Frontend.md](Frontend.md) | Auth & account — reusable UI baseline spec (path-scoped: components/, pages/, *.tsx) |
+| [Backend.md](Backend.md) | Auth & account — reusable API baseline spec (path-scoped: auth/, users/, session*) |
+| [FEATURE_SPEC_TEMPLATE.md](FEATURE_SPEC_TEMPLATE.md) | Fill-in-the-blank template for non-auth CRUD / feature specs |
+
+---
+
+### Mechanism Layer (Hooks / Subagents / Slash Commands)
+
+| Path | Purpose |
+| --- | --- |
+| [.claude/settings.json](.claude/settings.json) | Hook wiring — all 4 enforcement hooks registered here |
+| `.claude/hooks/` | Shell scripts: `block-tests.sh`, `checkpoint.sh`, `loop-count.sh`, `loop-block-edits.sh` |
+| `.claude/agents/` | Isolated subagent definitions (security, devops, performance, qa, reviewer, architect) |
+| `.claude/commands/` | Slash commands: `/handoff-tests`, `/loop-reset`, `/classify` |
+| [templates/global-CLAUDE.md](templates/global-CLAUDE.md) | Cross-project identity template — install at `~/.claude/CLAUDE.md` |
+| [MIGRATION.md](MIGRATION.md) | Setup guide: global memory install, hook enable, first-use approval |
 
 ---
 

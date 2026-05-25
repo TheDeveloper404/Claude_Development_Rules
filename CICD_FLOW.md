@@ -242,7 +242,28 @@ Feature flags allow code to be deployed to production without being released to 
 
 ---
 
-## 14. Summary
+## 14. AI Session Safety
+
+Before starting a fix or refactor session, the `checkpoint.sh` hook automatically snapshots
+the working tree via `git stash create`.
+
+**Recovery from a bad AI session:**
+```bash
+git stash apply $(git rev-parse refs/cc-checkpoints/last)
+```
+
+For full code + conversation rollback, use `/rewind` in Claude Code.
+
+**Loop guard:** if 3 consecutive test cycles fail, `loop-block-edits.sh` blocks further edits
+until a `git diff` root-cause audit is completed. Run `/loop-reset` to unblock after the audit.
+
+**Test handoff:** use `/handoff-tests` to toggle between "Claude runs tests" and
+"human runs tests" modes. When the `HUMAN_RUNS_TESTS` flag is set, Claude's test commands
+are intercepted by `block-tests.sh` (exit 2).
+
+---
+
+## 15. Summary
 
 The workflow is intentionally simple:
 
@@ -255,6 +276,6 @@ The workflow is intentionally simple:
 
 ---
 
-## 14. One Rule
+## 16. One Rule
 
 > If the pipeline is red, nothing moves forward.

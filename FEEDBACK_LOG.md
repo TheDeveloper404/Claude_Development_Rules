@@ -1,25 +1,23 @@
 # Feedback Log — AI Behavior Corrections
 
-This file logs observed AI failures and the rules added or updated in response.
+This file is the **team-shared** record of AI failures and the rules added in response.
+It is committed and visible to all collaborators. Keep it slim — target < 40 lines.
 
-**How to use:**
-1. When the AI makes a mistake — wrong output, ignored rule, hallucination, regression loop — log it here
-2. Identify which rule was violated or missing
-3. Either update an existing rule in the relevant document, or note it here if it's project-specific
-4. The AI reads this file at the start of each session and uses it to avoid repeating past mistakes
-
-**For the AI:** Read every entry in this log before starting any task. These are real failures that happened in this project. Do not repeat them.
+For locally auto-captured per-machine lessons, see the `/memory` directory in the Claude Code session.
 
 ---
 
-## Log Format
+## How to Add an Entry
+
+When the AI makes a mistake, log it in the format below, update the relevant document,
+and commit both together so future sessions start with the corrected rule already loaded.
 
 ```
 ---
 Date: YYYY-MM-DD
-What happened: [description of what the AI did wrong]
-Rule violated: [which rule from which document, or "missing rule"]
-Action taken: [rule updated in X document / logged here as reminder]
+What happened: [brief description of wrong output]
+Rule violated: [document + section, or "missing rule"]
+Action taken: [updated X in document Y / logged here as project-specific reminder]
 ---
 ```
 

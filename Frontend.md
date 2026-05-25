@@ -1,3 +1,17 @@
+---
+label: "Auth & Account — reusable frontend baseline spec"
+paths:
+  - "**/components/**"
+  - "**/pages/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/ui/**"
+note: >
+  Path-scoped. @imports load at session start and do NOT save tokens.
+  Path scoping is what actually saves context — load this file only when
+  working in matched paths (components, pages, .tsx/.jsx files).
+---
+
 # Frontend Specification — Auth & Account Management (General)
 
 This document defines the expected behavior, UX requirements, and component standards for authentication flows and account management in any SPA-based application.

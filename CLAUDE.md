@@ -1,3 +1,6 @@
+<!-- ruleset_version: 1.0 -->
+<!-- Cross-project identity + universal principles: see templates/global-CLAUDE.md -->
+
 # AI Engineering Working Mode
 
 This file defines HOW the system operates.

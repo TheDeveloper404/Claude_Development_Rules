@@ -1,3 +1,16 @@
+---
+label: "Auth & Account — reusable backend baseline spec"
+paths:
+  - "**/auth/**"
+  - "**/users/**"
+  - "**/session*"
+  - "**/*auth*"
+note: >
+  Path-scoped. @imports load at session start and do NOT save tokens.
+  Path scoping is what actually saves context — load this file only when
+  working in matched paths (auth/, users/, session*, *auth*).
+---
+
 # Backend Specification — Auth & User Management (General)
 
 This document defines the expected API behavior, validation rules, security requirements, and response contracts for authentication and user account management endpoints.
@@ -516,3 +529,337 @@ If using HttpOnly cookies: set `Set-Cookie` header with access token. Do not ret
 - No stack traces, SQL errors, or file paths in error responses
 - Structured logging for all auth events (login, logout, password change, account deletion) — without logging sensitive values
 - All endpoints behind HTTPS in production
+
+---
+
+## OAuth / Social Login
+
+### POST /api/v1/auth/oauth/:provider
+
+**Purpose:** Initiate an OAuth authorization flow (redirect to provider).
+
+**Supported providers:** configure per project (e.g. `google`, `github`, `microsoft`).
+
+**Rate limit:** 10 requests / IP / 15 minutes
+
+**Request:** No body. `:provider` is a path parameter.
+
+**On success (302):** Redirect to provider authorization URL with `state` param (CSRF token, signed server-side).
+
+**Security:**
+- Generate a cryptographically random `state` param and store it in the session/cookie
+- Validate `state` on callback to prevent CSRF
+- Use PKCE for public clients
+
+---
+
+### GET /api/v1/auth/oauth/:provider/callback
+
+**Purpose:** Handle OAuth provider callback, exchange code for tokens, issue session.
+
+**Request:** Query params `code` and `state` from the provider.
+
+**On success (200 or redirect):**
+```json
+{
+  "user": { "id": "uuid", "name": "string", "email": "string" },
+  "isNewUser": true
+}
+```
+Or redirect to the app with session cookie set.
+
+**Behavior:**
+- Validate `state` matches the one stored in the session
+- Exchange authorization code for access token (server-to-server — never expose provider token to client)
+- Look up user by provider ID (`provider_user_id`) — if found, log in; if not, create account
+- If email already exists under a different provider: link accounts only with explicit user confirmation (see link endpoint)
+- Issue local session (same as login flow)
+
+**Security:**
+- Never return or store the raw OAuth provider access token in the frontend
+- Exchange is server-side only
+
+---
+
+### POST /api/v1/users/me/oauth/link
+
+**Purpose:** Link an OAuth provider to an existing authenticated account.
+
+**Auth required:** Yes
+
+**Request:**
+```json
+{
+  "provider": "string (e.g. 'google')",
+  "code": "string (authorization code from provider flow)"
+}
+```
+
+**On success (200):**
+```json
+{
+  "message": "Provider linked successfully.",
+  "linkedProviders": ["google", "github"]
+}
+```
+
+**Security:**
+- Prevent linking a provider that is already linked to another account
+- Require re-authentication (recent login) before linking
+
+---
+
+### DELETE /api/v1/users/me/oauth/:provider
+
+**Purpose:** Unlink an OAuth provider from the current account.
+
+**Auth required:** Yes
+
+**On success (200):**
+```json
+{
+  "message": "Provider unlinked successfully."
+}
+```
+
+**Security:**
+- Block unlinking if it would leave the account with no login method (no password AND last provider)
+- Prompt user to set a password first if they have none
+
+---
+
+## MFA / TOTP
+
+### POST /api/v1/users/me/mfa/enroll
+
+**Purpose:** Begin MFA enrollment — generate a TOTP secret and QR code URI. MFA is NOT yet active after this step.
+
+**Auth required:** Yes
+
+**On success (200):**
+```json
+{
+  "secret": "BASE32_ENCODED_SECRET",
+  "qrCodeUri": "otpauth://totp/...",
+  "backupCodes": ["xxxxxxxx", "xxxxxxxx", "..."]
+}
+```
+
+**Notes:**
+- `secret` and `qrCodeUri` are shown once — user must save them
+- `backupCodes` are 10 single-use codes (store hashed, show raw once)
+- MFA is not activated until `/mfa/verify-enroll` succeeds
+
+---
+
+### POST /api/v1/users/me/mfa/verify-enroll
+
+**Purpose:** Confirm MFA enrollment by verifying the first TOTP code. Activates MFA.
+
+**Auth required:** Yes
+
+**Rate limit:** 5 requests / user / 15 minutes
+
+**Request:**
+```json
+{
+  "code": "string (6-digit TOTP code)"
+}
+```
+
+**On success (200):**
+```json
+{
+  "message": "MFA enabled successfully.",
+  "backupCodesRemaining": 10
+}
+```
+
+**Security:**
+- Validate TOTP with ±1 step window (30s tolerance)
+- Reject if MFA already active
+
+---
+
+### POST /api/v1/auth/mfa/verify
+
+**Purpose:** Verify TOTP code during login (second factor). Called after successful credential check when the account has MFA enabled.
+
+**Rate limit:** 5 requests / pending-session / 15 minutes
+
+**Request:**
+```json
+{
+  "code": "string (6-digit TOTP or 8-character backup code)"
+}
+```
+
+**On success (200):** Issue full session (same as login success). Set auth cookies.
+
+**On failure (401):** "Invalid or expired code."
+
+**Security:**
+- Pending session (pre-MFA) must expire after 5 minutes if MFA is not completed
+- Backup codes are single-use — invalidate immediately after use
+- Log MFA failures for abuse detection
+
+---
+
+### POST /api/v1/users/me/mfa/disable
+
+**Purpose:** Disable MFA for the account.
+
+**Auth required:** Yes (full session — not pending)
+
+**Request:**
+```json
+{
+  "code": "string (TOTP code or backup code)",
+  "password": "string (current password — re-authentication)"
+}
+```
+
+**On success (200):**
+```json
+{
+  "message": "MFA has been disabled."
+}
+```
+
+**Security:**
+- Require both current password AND a valid TOTP/backup code
+- Invalidate all backup codes on disable
+
+---
+
+### POST /api/v1/users/me/mfa/backup-codes
+
+**Purpose:** Regenerate MFA backup codes (replaces all existing codes).
+
+**Auth required:** Yes
+
+**Request:**
+```json
+{
+  "code": "string (current TOTP code — confirmation)"
+}
+```
+
+**On success (200):**
+```json
+{
+  "backupCodes": ["xxxxxxxx", "xxxxxxxx", "..."]
+}
+```
+
+**Security:**
+- Show raw codes once — store only hashed values
+- Invalidate all previous backup codes immediately
+
+---
+
+## Confirm Email Change
+
+### POST /api/v1/users/me/confirm-email-change
+
+**Purpose:** Apply the email address change after the user clicks the verification link sent to the new email. This completes the flow initiated by `POST /api/v1/users/me/change-email`.
+
+**Auth required:** Yes (or token-based — configurable)
+
+**Rate limit:** 5 requests / token / hour
+
+**Request:**
+```json
+{
+  "token": "string (required — from verification email link)"
+}
+```
+
+**On success (200):**
+```json
+{
+  "message": "Email address updated successfully.",
+  "email": "new@example.com"
+}
+```
+
+**On failure:**
+- Invalid or expired token: `422 UNPROCESSABLE` — "This verification link is invalid or has expired."
+- Token already used: `422 UNPROCESSABLE`
+
+**Security:**
+- Token must be single-use — invalidate immediately after use
+- Token must expire (same TTL as `EMAIL_VERIFY_TTL`)
+- Verify the new email is still not taken by another account at time of confirmation
+- Update the `email` field only after successful token validation
+- Invalidate any other pending email-change tokens for this user
+
+---
+
+## Configuration Reference
+
+All tunable values must be set via environment variables or named constants — never hardcoded.
+
+| Configuration | Env Var | Default | Notes |
+|---|---|---|---|
+| Access token TTL | `ACCESS_TOKEN_TTL` | `15m` | Keep short |
+| Refresh token TTL | `REFRESH_TOKEN_TTL` | `30d` | |
+| Password reset token TTL | `RESET_TOKEN_TTL` | `60m` | |
+| Email verification TTL | `EMAIL_VERIFY_TTL` | `24h` | Incl. email-change confirm |
+| bcrypt cost factor | `BCRYPT_COST` | `12` | Minimum 12 |
+| Account lockout threshold | `LOCKOUT_THRESHOLD` | `10` | Consecutive failures |
+| Account lockout duration | `LOCKOUT_DURATION` | `30m` | |
+| Login rate limit | `RATE_LIMIT_LOGIN` | `10 / 15m / IP` | |
+| Register rate limit | `RATE_LIMIT_REGISTER` | `5 / 15m / IP` | |
+| MFA backup code count | `MFA_BACKUP_COUNT` | `10` | Single-use each |
+| OAuth state TTL | `OAUTH_STATE_TTL` | `10m` | CSRF state expiry |
+
+---
+
+## Data Model — Auth
+
+> Follows `agents/database-engineer.md` naming conventions.
+> Tables: snake_case plural. Columns: snake_case singular.
+> All FK columns indexed. Standard `id` / `created_at` / `updated_at` columns.
+> All migrations must be reversible.
+
+### Table: `sessions`
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | uuid | PK DEFAULT gen_random_uuid() | |
+| user_id | uuid | FK users(id) ON DELETE CASCADE, NOT NULL | Indexed |
+| device | varchar(255) | nullable | Device label (e.g. "Chrome / macOS") |
+| user_agent | text | nullable | Raw user-agent string |
+| ip_address | varchar(64) | nullable | Store masked or hashed — see SECURITY NOTE |
+| created_at | timestamptz | NOT NULL DEFAULT now() | |
+| last_active_at | timestamptz | NOT NULL | Update on each token refresh |
+| expires_at | timestamptz | NOT NULL | |
+| revoked_at | timestamptz | nullable | Set when session explicitly revoked |
+
+**Indexes:** `idx_sessions_user_id`, `idx_sessions_expires_at`
+**Constraint names:** `fk_sessions_user_id`
+
+### Table: `refresh_tokens`
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | uuid | PK DEFAULT gen_random_uuid() | |
+| user_id | uuid | FK users(id) ON DELETE CASCADE, NOT NULL | Indexed |
+| session_id | uuid | FK sessions(id) ON DELETE CASCADE, NOT NULL | Indexed |
+| token_hash | varchar(255) | UNIQUE NOT NULL | SHA-256 of raw token — NEVER store raw |
+| issued_at | timestamptz | NOT NULL DEFAULT now() | |
+| expires_at | timestamptz | NOT NULL | |
+| rotated_at | timestamptz | nullable | Set on rotation — single-use enforced |
+| replaced_by | uuid | FK refresh_tokens(id) nullable | Rotation chain (self-referential) |
+| revoked_at | timestamptz | nullable | Set when explicitly revoked |
+
+**Indexes:** `idx_refresh_tokens_user_id`, `idx_refresh_tokens_session_id`,
+`uq_refresh_tokens_token_hash` (covers UNIQUE lookup)
+**Constraint names:** `fk_refresh_tokens_user_id`, `fk_refresh_tokens_session_id`,
+`fk_refresh_tokens_replaced_by`
+
+> **SECURITY NOTE:** Never store raw refresh tokens — hash them (SHA-256) before inserting.
+> Store IP addresses masked or hashed at storage time per privacy policy
+> (e.g. mask last two octets as `x`: `192.168.x.x`, or store `HMAC-SHA256(ip, secret)`).
+> Single-use token rotation: mark `rotated_at` on the old token before issuing the new one.
