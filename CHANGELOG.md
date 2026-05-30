@@ -6,6 +6,25 @@ Format: `[ruleset_version] YYYY-MM-DD — Summary`
 
 ---
 
+## [1.1] 2026-05-30 — Two New Enforcement Hooks + Document Sync
+
+### Added
+- `.claude/hooks/block-push-main.sh` — blocks direct `git push` to `main`/`master`
+- `.claude/hooks/scan-secrets.sh` — scans staged files for hardcoded secrets before `git commit`
+
+### Changed
+- `.claude/settings.json` — 2 new hooks registered (now 6 total)
+- `README.md` — updated hook count and list; removed deleted `agents/` references; fixed Agent Roles to point to `.claude/agents/`; removed non-existent Commands.md link
+- `WORKFLOW.md` — updated agent load table to use `.claude/agents/` paths; removed non-existent agent refs
+- `MIGRATION.md` — updated hook counts; added 2 new hooks to summary table; fixed agents reference
+- `SYSTEM_PROMPT.md` §13 — added 2 new hooks to non-negotiable list
+
+### Why
+Push-to-main and secret-in-commit were soft rules in `.md` files — enforced only by trust.
+Now they are hard guards. Also synced all docs to reflect the deleted `agents/` directory.
+
+---
+
 ## [1.0] 2026-05-25 — Enforcement Layer, Modularization, and New Specs
 
 ### Added

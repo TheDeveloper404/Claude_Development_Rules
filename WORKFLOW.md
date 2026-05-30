@@ -63,17 +63,14 @@ Do NOT load everything. Load only what is relevant.
 
 | Situation | Load |
 |---|---|
-| Frontend work | `Frontend.md`, `agents/frontend-engineer.md` |
-| Backend work | `Backend.md`, `agents/backend-engineer.md` |
-| Auth / security feature | `agents/security-engineer.md` |
-| Database design | `agents/database-engineer.md` |
-| Deployment / CI / infra / feature flags | `CICD_FLOW.md`, `agents/devops-engineer.md` |
-| Requirements / acceptance criteria | `agents/product-owner.md` |
-| Code standards / structure | `agents/tech-lead.md` |
-| Architecture decision | `agents/architect.md` |
-| Full project coordination | `agents/orchestrator.md` |
-| Testing | `agents/qa-tester.md` |
-| Review | `agents/code-reviewer.md` |
+| Frontend work | `Frontend.md`, `UI_UX_RULES.md` |
+| Backend work | `Backend.md` |
+| Auth / security feature | `.claude/agents/security-engineer.md` |
+| Deployment / CI / infra / feature flags | `CICD_FLOW.md`, `.claude/agents/devops-engineer.md` |
+| Architecture decision | `.claude/agents/architect.md` |
+| Testing | `.claude/agents/qa-tester.md` |
+| Review | `.claude/agents/code-reviewer.md` |
+| Performance | `.claude/agents/performance-engineer.md` |
 
 ---
 

@@ -26,7 +26,6 @@ The system simulates a software engineering team. Claude acts as the lead engine
 | [EXAMPLES.md](EXAMPLES.md) | Concrete examples of correct and incorrect AI output |
 | [FEEDBACK_LOG.md](FEEDBACK_LOG.md) | Shared log of past AI failures and corrections |
 | [context/Engineering_Model.md](context/Engineering_Model.md) | Philosophy — why the system is designed this way |
-| [Claude Code – Commands/Commands.md](Claude%20Code%20%E2%80%93%20Commands/Commands.md) | Claude Code CLI command reference |
 | [CHANGELOG.md](CHANGELOG.md) | Ruleset version history and change log |
 
 ---
@@ -56,8 +55,8 @@ The system simulates a software engineering team. Claude acts as the lead engine
 
 | Path | Purpose |
 | --- | --- |
-| [.claude/settings.json](.claude/settings.json) | Hook wiring — all 4 enforcement hooks registered here |
-| `.claude/hooks/` | Shell scripts: `block-tests.sh`, `checkpoint.sh`, `loop-count.sh`, `loop-block-edits.sh` |
+| [.claude/settings.json](.claude/settings.json) | Hook wiring — all 6 enforcement hooks registered here |
+| `.claude/hooks/` | Shell scripts: `block-tests.sh`, `checkpoint.sh`, `loop-count.sh`, `loop-block-edits.sh`, `block-push-main.sh`, `scan-secrets.sh` |
 | `.claude/agents/` | Isolated subagent definitions (security, devops, performance, qa, reviewer, architect) |
 | `.claude/commands/` | Slash commands: `/handoff-tests`, `/loop-reset`, `/classify` |
 | [templates/global-CLAUDE.md](templates/global-CLAUDE.md) | Cross-project identity template — install at `~/.claude/CLAUDE.md` |
@@ -67,21 +66,16 @@ The system simulates a software engineering team. Claude acts as the lead engine
 
 ### Agent Roles (Load Only When Needed)
 
+Subagents are isolated context instances defined in `.claude/agents/`. Invoke them for specialized tasks.
+
 | Agent | Role |
 | --- | --- |
-| [agents/product-owner.md](agents/product-owner.md) | Requirements, acceptance criteria, prioritization |
-| [agents/orchestrator.md](agents/orchestrator.md) | Coordinates the team; active for NORMAL/CRITICAL tasks |
-| [agents/architect.md](agents/architect.md) | System design, technology selection, ADRs |
-| [agents/tech-lead.md](agents/tech-lead.md) | Coding standards, implementation guidance |
-| [agents/backend-engineer.md](agents/backend-engineer.md) | APIs, business logic, auth, data validation |
-| [agents/frontend-engineer.md](agents/frontend-engineer.md) | UI components, routing, state, API integration |
-| [agents/database-engineer.md](agents/database-engineer.md) | Schema design, migrations, query optimization |
-| [agents/devops-engineer.md](agents/devops-engineer.md) | Infrastructure, CI/CD, deployment |
-| [agents/security-engineer.md](agents/security-engineer.md) | Security audits, threat modeling — veto power |
-| [agents/qa-tester.md](agents/qa-tester.md) | Test strategy, unit/integration/security/E2E tests |
-| [agents/code-reviewer.md](agents/code-reviewer.md) | Code review — blocking authority before merge |
-| [agents/performance-engineer.md](agents/performance-engineer.md) | Performance profiling, optimization |
-| [agents/documentation-writer.md](agents/documentation-writer.md) | User-facing and developer documentation |
+| [.claude/agents/security-engineer.md](.claude/agents/security-engineer.md) | Security audits, threat modeling — veto power |
+| [.claude/agents/architect.md](.claude/agents/architect.md) | System design, technology selection, ADRs |
+| [.claude/agents/code-reviewer.md](.claude/agents/code-reviewer.md) | Code review — blocking authority before merge |
+| [.claude/agents/qa-tester.md](.claude/agents/qa-tester.md) | Test strategy, unit/integration/security/E2E tests |
+| [.claude/agents/devops-engineer.md](.claude/agents/devops-engineer.md) | Infrastructure, CI/CD, deployment |
+| [.claude/agents/performance-engineer.md](.claude/agents/performance-engineer.md) | Performance profiling, optimization |
 
 ---
 

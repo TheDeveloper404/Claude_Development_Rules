@@ -7,8 +7,8 @@ This document explains what changed in this system update and how to set up the 
 ## What Changed (ruleset_version 1.0)
 
 ### Scope A — Mechanism Layer (hooks + slash commands)
-- `.claude/settings.json` — 4 enforcement hooks wired (already existed; documented here)
-- `.claude/hooks/` — 4 shell scripts authored separately by the repo owner (DO NOT MODIFY)
+- `.claude/settings.json` — 6 enforcement hooks wired (already existed; documented here)
+- `.claude/hooks/` — 6 shell scripts authored separately by the repo owner (DO NOT MODIFY)
 - `.claude/commands/` — 3 slash commands added: `/handoff-tests`, `/loop-reset`, `/classify`
 - `.gitignore` — runtime state files (`HUMAN_RUNS_TESTS`, `.loop-state`) now gitignored
 
@@ -85,6 +85,8 @@ Hook summary:
 | `checkpoint.sh` | PreToolUse / Bash | Snapshots working tree before test runs (git stash create) |
 | `loop-count.sh` | PostToolUse / Bash | Counts consecutive FAILED test cycles into `.loop-state` |
 | `loop-block-edits.sh` | PreToolUse / Edit\|Write\|MultiEdit | Blocks edits when `.loop-state` >= 3 |
+| `block-push-main.sh` | PreToolUse / Bash | Blocks `git push` direct to `main`/`master` |
+| `scan-secrets.sh` | PreToolUse / Bash | Scans staged files for hardcoded secrets before `git commit` |
 
 **Runtime state files** (gitignored, machine-local):
 - `.claude/HUMAN_RUNS_TESTS` — presence flag; create/remove with `/handoff-tests`
@@ -135,4 +137,4 @@ session's context window. Invoke them for specialized tasks:
 - `qa-tester` — test strategy, test writing, coverage gaps
 - `code-reviewer` — pre-merge quality gate, architecture compliance
 
-The original `agents/*.md` files remain unchanged and are the source of truth for role definitions.
+The `.claude/agents/` files are the active subagent definitions. The original `agents/` directory has been removed.

@@ -174,7 +174,7 @@ If you cannot verify something (e.g. you cannot run the app), say which verifica
 ### 13. Hook-enforced rules are non-negotiable
 
 Rules enforced by hooks (`block-tests.sh`, `checkpoint.sh`, `loop-count.sh`,
-`loop-block-edits.sh`) are **non-negotiable and cannot be bypassed** — do not attempt
+`loop-block-edits.sh`, `block-push-main.sh`, `scan-secrets.sh`) are **non-negotiable and cannot be bypassed** — do not attempt
 workarounds, do not try to delete or disable the flag files, and do not use flags or
 conditions intended to circumvent the guards. If a hook blocks you, follow the prescribed
 recovery path (`/loop-reset` after audit, `/handoff-tests` to restore test access).
